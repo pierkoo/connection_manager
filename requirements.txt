@@ -1,0 +1,2 @@
+pyodbc==4.0.31
+pyperclip==1.8.2

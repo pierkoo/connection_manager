@@ -1,0 +1,52 @@
+USE [polaczenia]
+GO
+
+/****** Object:  StoredProcedure [dbo].[dodaj_klienta]    Script Date: 2021-08-04 13:47:30 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+      
+CREATE procedure [dbo].[dodaj_klienta]         
+@nazwa varchar(256)        
+, @info text = ''        
+, @kontakt text = ''        
+, @vpn_info text = ''        
+, @vpn_login text = ''        
+, @vpn_pass text = ''        
+, @rdp_info text = ''        
+, @rdp_login text = ''        
+, @rdp_pass text = ''        
+, @simple_login text = ''        
+, @simple_pass text = ''        
+, @rdp_path  nvarchar(200) = ''        
+AS        
+/*      
+exec polaczenia.dbo.dodaj_klienta       
+  'Nazwa'     -- @nazwa varchar(256)        
+, 'Info'         -- @info text      
+, 'Kontakt'       -- @kontakt text       
+, 'VPN'       -- @vpn_info text       
+, 'vpn_login'       -- @vpn_login text        
+, 'vpn_hasło'       -- @vpn_pass text        
+, 'rdp'         -- @rdp_info text        
+, 'rdp_login'      
+, 'rdp_hasło'      
+, 'erp_login'      
+, 'erp_hasło'      
+, 'rdp_path'      
+*/      
+      
+      
+BEGIN        
+insert into polaczenia.dbo.klient         
+(nazwa, info, kontakt, vpn_info, vpn_login, vpn_pass, rdp_info, rdp_login , rdp_pass , simple_login, simple_pass, rdp_path )        
+values        
+(@nazwa, @info, @kontakt, @vpn_info, @vpn_login, @vpn_pass, @rdp_info, @rdp_login , @rdp_pass , @simple_login, @simple_pass, replace(@rdp_path,'"','') )        
+        
+END
+GO
+
+
