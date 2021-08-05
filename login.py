@@ -1,6 +1,8 @@
 import pyodbc 
 import tkinter as tk
 from tkinter import ttk
+from utils import Config
+from config_window import ConfigurationWindow as c_w
 
 class PassCheck:
     def __init__(self, master):
@@ -13,25 +15,31 @@ class PassCheck:
         self.frame.pack()
         self.password=""
         self.create_widgets()
+
     def get_pass (self,a):
         self.password = self.pas.get()
         self.master.destroy()
 
-    def check_pass(self, password, config):
-        try:
-            with pyodbc.connect('DRIVER={ODBC Driver 11 for SQL Server};SERVER='+config.server+';DATABASE='+config.database+';UID='+config.username+';PWD='+ password) as conn:
-                pass
-        except:        
-            print("Złe hasło")
-            exit()
+
+
 
     def create_widgets(self):
-
         self.menubar = tk.Menu(self.master)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
-
-        self.filemenu.add_command(label="Konfiguracja", command='')
+        self.filemenu.add_command(label="Konfiguracja", command= self.open_config_window)
         self.filemenu.add_command(label="Wyjście", command=self.master.quit)
         self.menubar.add_cascade(label="Opcje", menu=self.filemenu)
-
         self.master.config(menu=self.menubar)
+
+    def open_config_window(self):
+        self.cw = c_w(self.master)
+
+
+
+
+
+
+
+
+
+

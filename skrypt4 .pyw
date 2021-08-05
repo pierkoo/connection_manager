@@ -1,18 +1,20 @@
 import tkinter as tk
-from utils import Config
 from login import PassCheck
 from main_window import MainWindow
+from utils import Config, check_pass
 
 def main(): 
 
-    root = tk.Tk()
-    #root.geometry("158x24")
-    #root.title("Podaj hasło")
-    app = PassCheck(root)
-    #root.mainloop()
-    #password=app.password
+    # root = tk.Tk()
+    # root.geometry("158x24")
+    # root.title("Podaj hasło")
+    # app = PassCheck(root)
+    # root.mainloop()
+    # password=app.password
+    password='ppp'
     configuration = Config()
-    app.check_pass('ppp', configuration)
+    print(password)
+    check_pass(password, configuration)
 
 
     root = tk.Tk()

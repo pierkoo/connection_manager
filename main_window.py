@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import ttk
 import pyperclip
 import os
+from config_window import ConfigurationWindow as c_w
+from add_c_window import AddClientWindow as a_w
 
 class MainWindow:
     
@@ -37,10 +39,10 @@ class MainWindow:
         self.menubar = tk.Menu(self.master)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
 
-        self.filemenu.add_command(label="Dodaj klienta", command='')
+        self.filemenu.add_command(label="Dodaj klienta", command=self.open_add_client_window)
         self.filemenu.add_command(label="Edytuj klienta", command='')
         self.filemenu.add_separator()
-        self.filemenu.add_command(label="Konfiguracja", command='')
+        self.filemenu.add_command(label="Konfiguracja", command=self.open_config_window)
         self.filemenu.add_command(label="Wyjście", command=self.master.quit)
         self.menubar.add_cascade(label="Opcje", menu=self.filemenu)
 
@@ -57,6 +59,7 @@ class MainWindow:
         self.lista = ttk.Combobox(self.frame, values=self.nazwa_all)
         self.lista.bind("<<ComboboxSelected>>", self.get_data)
         self.lista.grid(row=1, column=2, columnspan=2, sticky=tk.W, pady=5)
+        self.lista.config(width=40)
 
         self.text = tk.Text(self.frame, height=15, width=50)
         self.text.grid(row=2, column=1, sticky=tk.W, columnspan=2, rowspan=10, padx=5)
@@ -161,3 +164,9 @@ class MainWindow:
             os.startfile(str(self.data["RDP_path"]))
         else:
              os.startfile("C:/Users/pszlaski/Documents/MOJE/Połączenia")
+
+    def open_config_window(self):
+        self.cw = c_w(self.master)
+
+    def open_add_client_window(self):
+        self.aw = a_w(self.master, self. password)
