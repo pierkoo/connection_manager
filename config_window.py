@@ -10,7 +10,7 @@ class ConfigurationWindow:
         self.master.wm_attributes("-disabled", True)
 
         self.top=tk.Toplevel(master)
-        self.top.geometry('440x130')
+        self.top.geometry('500x130')
 
         lab_width = 12
         txt_width = 20

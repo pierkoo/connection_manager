@@ -2,19 +2,22 @@ import pyodbc
 from datetime import datetime
 import subprocess
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import pyperclip
 import os
 from config_window import ConfigurationWindow as c_w
 from add_c_window import AddClientWindow as a_w
+from utils import delete_client_from_db
 
 class MainWindow:
     
     def __init__(self, master,password, config):
+        master.title("Połączenia do klientów")
+        master.geometry("575x330")
         self.server = config.server # for a named instance
         self.database = config.database
         self.username = config.username
-        self.data={"Nazwa":"",
+        self.data_empty={"Nazwa":"",
                     "Info":"",
                     "Kontakt":"",
                     "VPN_Info":"",
@@ -27,7 +30,7 @@ class MainWindow:
                     "Simple_pass":"",
                     "RDP_path":""
                    }
-
+        self.data = self.data_empty
         self.password=password
         self.master = master
         self.frame = tk.Frame(self.master)
@@ -39,8 +42,11 @@ class MainWindow:
         self.menubar = tk.Menu(self.master)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
 
-        self.filemenu.add_command(label="Dodaj klienta", command=self.open_add_client_window)
+        self.filemenu.add_command(label="Dodaj klienta", command= self.open_add_client_window)
         self.filemenu.add_command(label="Edytuj klienta", command='')
+        self.filemenu.add_separator()
+        self.filemenu.add_command(label="Usuń klienta", command= self.delete_client)
+        #self.filemenu.add_command(label="Usuń klienta", command= lambda: self.refresh_list())
         self.filemenu.add_separator()
         self.filemenu.add_command(label="Konfiguracja", command=self.open_config_window)
         self.filemenu.add_command(label="Wyjście", command=self.master.quit)
@@ -57,7 +63,7 @@ class MainWindow:
         self.lab_nazwa.config(width=lab_width)
 
         self.lista = ttk.Combobox(self.frame, values=self.nazwa_all)
-        self.lista.bind("<<ComboboxSelected>>", self.get_data)
+        self.lista.bind("<<ComboboxSelected>>",  self.get_data)
         self.lista.grid(row=1, column=2, columnspan=2, sticky=tk.W, pady=5)
         self.lista.config(width=40)
 
@@ -120,40 +126,38 @@ class MainWindow:
             nazwa_all = [row[0] for row in rows ]
             return nazwa_all
 
-    def get_data(self,a):
-        with pyodbc.connect('DRIVER={ODBC Driver 11 for SQL Server};SERVER='+self.server+';DATABASE='+self.database+';UID='+self.username+';PWD='+ self.password) as conn:
-            cursor = conn.cursor()
-            zapytanie = " select * from klient where nazwa like '" + self.lista.get() + "'"
-            cursor.execute(zapytanie)
-            row = cursor.fetchone()
+    def get_data(self, event = None):
 
-            self.text.delete(1.0, tk.END)
+        if self.lista.get() =='':
+            for e in self.data: self.data[e] = ''
 
-            i=0
-            for e in self.data:
-                self.data[e]=row[i]
-                i+=1
-
-            self.text.insert(tk.INSERT,"Nazwa"+ " - " +str(self.data["Nazwa"])+"\n\n")
-            self.text.insert(tk.INSERT,"Info"+ " - " +str(self.data["Info"])+"\n\n")
-            self.text.insert(tk.INSERT,"kontakt"+ " - " +str(self.data["Kontakt"])+"\n")
+        else:
+            with pyodbc.connect('DRIVER={ODBC Driver 11 for SQL Server};SERVER='+self.server+';DATABASE='+self.database+';UID='+self.username+';PWD='+ self.password) as conn:
+                cursor = conn.cursor()
+                zapytanie = " select * from klient where nazwa like '" + self.lista.get() + "'"
+                cursor.execute(zapytanie)
+                row = cursor.fetchone()
 
 
-            self.but_vpn_info.config( text= str(self.data["VPN_Info"]))
 
-            self.but_vpn_login.config( text= str(self.data["VPN_login"]))
+                i=0
+                for e in self.data:
+                    self.data[e]=row[i]
+                    i+=1
 
-            self.but_vpn_pass.config(text= "***")
+        self.text.delete(1.0, tk.END)
+        self.text.insert(tk.INSERT,"Nazwa"+ " - " +str(self.data["Nazwa"])+"\n\n")
+        self.text.insert(tk.INSERT,"Info"+ " - " +str(self.data["Info"])+"\n\n")
+        self.text.insert(tk.INSERT,"kontakt"+ " - " +str(self.data["Kontakt"])+"\n")
 
-            self.but_rdp_info.config( text= str(self.data["RDP_Info"]))
-
-            self.but_rdp_login.config( text= str(self.data["RDP_login"]))
-
-            self.but_rdp_pass.config( text= "***")
-
-            self.but_simple_login.config( text= str(self.data["Simple_login"]))
-  
-            self.but_simple_pass.config( text= "***")
+        self.but_vpn_info.config( text= str(self.data["VPN_Info"]))
+        self.but_vpn_login.config( text= str(self.data["VPN_login"]))
+        self.but_vpn_pass.config(text= "***")
+        self.but_rdp_info.config( text= str(self.data["RDP_Info"]))
+        self.but_rdp_login.config( text= str(self.data["RDP_login"]))
+        self.but_rdp_pass.config( text= "***")
+        self.but_simple_login.config( text= str(self.data["Simple_login"]))
+        self.but_simple_pass.config( text= "***")
 
     def copy_password(self,h):
         pyperclip.copy(h)
@@ -166,7 +170,31 @@ class MainWindow:
              os.startfile("C:/Users/pszlaski/Documents/MOJE/Połączenia")
 
     def open_config_window(self):
-        self.cw = c_w(self.master)
+        #self.cw = c_w(self.master)
+        c_w(self.master)
 
     def open_add_client_window(self):
-        self.aw = a_w(self.master, self. password)
+        #self.aw = a_w(self.master, self. password, self.refresh_list())
+        a_w(self.master, self. password, self.refresh_after_adding)
+
+    def refresh_after_adding(self,nazwa):
+        self.nazwa_all = self.get_list()
+        self.lista['values'] = self.nazwa_all
+        self.lista.set(nazwa)
+        self.get_data()
+
+    def refresh_after_deletion(self):
+        self.nazwa_all = self.get_list()
+        self.lista['values'] = self.nazwa_all
+        self.lista.set('')
+        self.get_data()
+
+
+    def delete_client(self):
+        to_be_deleted = self.lista.get()
+        if messagebox.askyesno(title="Na pewno?", message=f"Na pewno skasować klienta {to_be_deleted}?"):
+            delete_client_from_db(self.password,to_be_deleted, self.refresh_after_deletion)
+
+
+
+

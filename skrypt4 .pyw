@@ -13,13 +13,10 @@ def main():
     # password=app.password
     password='ppp'
     configuration = Config()
-    print(password)
     check_pass(password, configuration)
 
 
     root = tk.Tk()
-    root.title("Połączenia do klientów")
-    root.geometry("575x330")
     app = MainWindow(root,'ppp',configuration)
     root.mainloop()
 

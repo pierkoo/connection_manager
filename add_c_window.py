@@ -1,13 +1,15 @@
 import pyodbc
 import tkinter as tk
 from tkinter import ttk, messagebox
-from utils import save_client_to_db
-
-
+from utils import save_client_to_db, Config, create_rdp_file
 
 class AddClientWindow:
 
-    def __init__(self,master, password):
+    def __init__(self,master, password, callback):
+        self.config = Config()
+        self.callback = callback
+        print(type(self.callback))
+        self.open= True
         self.password = password
         self.master = master
         self.master.wm_attributes("-disabled", True)
@@ -88,7 +90,7 @@ class AddClientWindow:
         self.e_vpn_login.grid(row=8, column=2, sticky=tk.W, columnspan=2, rowspan=1, padx=5, pady=2)
         self.e_vpn_login.configure(font='Calibri 12',  borderwidth=2, relief="groove")
 
-        self.e_vpn_pass = tk.Entry(self.top, width=txt_width)
+        self.e_vpn_pass = tk.Entry(self.top, width=txt_width, show="*")
         self.e_vpn_pass.grid(row=9, column=2, sticky=tk.W, columnspan=2, rowspan=1, padx=5, pady=2)
         self.e_vpn_pass.configure(font='Calibri 12',  borderwidth=2, relief="groove")
 
@@ -100,7 +102,7 @@ class AddClientWindow:
         self.e_rdp_login.grid(row=11, column=2, sticky=tk.W, columnspan=2, rowspan=1, padx=5, pady=2)
         self.e_rdp_login.configure(font='Calibri 12',  borderwidth=2, relief="groove")
 
-        self.e_rdp_pass = tk.Entry(self.top, width=txt_width)
+        self.e_rdp_pass = tk.Entry(self.top, width=txt_width, show="*")
         self.e_rdp_pass.grid(row=12, column=2, sticky=tk.W, columnspan=2, rowspan=1, padx=5, pady=2)
         self.e_rdp_pass.configure(font='Calibri 12',  borderwidth=2, relief="groove")
 
@@ -108,7 +110,7 @@ class AddClientWindow:
         self.e_simple_login.grid(row=13, column=2, sticky=tk.W, columnspan=2, rowspan=1, padx=5, pady=2)
         self.e_simple_login.configure(font='Calibri 12',  borderwidth=2, relief="groove")
 
-        self.e_simple_pass = tk.Entry(self.top, width=txt_width)
+        self.e_simple_pass = tk.Entry(self.top, width=txt_width, show="*")
         self.e_simple_pass.grid(row=14, column=2, sticky=tk.W, columnspan=2, rowspan=1, padx=5, pady=2)
         self.e_simple_pass.configure(font='Calibri 12',  borderwidth=2, relief="groove")
 
@@ -133,8 +135,11 @@ class AddClientWindow:
         return("break")
 
     def save_client(self):
-        if self.e_client_name.get():
-
+        name = self.e_client_name.get()
+        if name:
+            rdp_path = self.config.rdp_path+self.e_client_name.get()+".rdp"
+            rdp_ip = self.e_rdp_name.get()
+            rdp_login = self.e_rdp_login.get()
             status, message = save_client_to_db(self.password,
                 self.e_client_name.get(),
                 self.e_info.get("1.0","end-1c"),
@@ -147,11 +152,14 @@ class AddClientWindow:
                 self.e_rdp_pass.get(),
                 self.e_simple_login.get(),
                 self.e_simple_pass.get(),
-                "rdp_path")
+                rdp_path)
 
             if status:
                 self.master.wm_attributes("-disabled", False)
                 self.top.destroy()
+                create_rdp_file(rdp_path, rdp_ip, rdp_login)
+                self.callback(name)
+
             else:
                 messagebox.showwarning(title="Błąd podczas zapisu", message=message)
 
@@ -162,3 +170,4 @@ class AddClientWindow:
     def close_window(self):
         self.master.wm_attributes("-disabled", False)
         self.top.destroy()
+        self.open = False
